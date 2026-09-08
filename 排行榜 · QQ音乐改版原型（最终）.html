@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<!-- saved from url=(0162)file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>排行榜 · QQ音乐改版原型</title>
+<style>
+  :root{
+    color-scheme: light;
+    --brand:#31C27C;
+    --brand-hover:#2aae6e;
+    --brand-press:#23975f;
+    --brand-soft:rgba(49,194,124,.12);
+    --brand-softer:rgba(49,194,124,.07);
+    --ink:#17191c;
+    --ink-2:#555c63;
+    --ink-3:#8b939b;
+    --ink-4:#b6bcc2;
+    --hairline:#eceef0;
+    --bg:#f6f7f8;
+    --hover:#f6f7f8;
+    --heart:#f0483e;
+    --new-bg:#e8faf1;
+    --shadow:0 10px 30px rgba(23,25,28,.12);
+    --radius-s:6px;
+    --radius-m:10px;
+    --radius-l:16px;
+    --top-h:118px;
+    --player-h:64px;
+    --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--font);
+    font-size:14px;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.5;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{text-decoration:none;color:inherit}
+  input{font-family:inherit}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+  .icon{width:18px;height:18px;display:block;flex:none}
+  .icon-sm{width:14px;height:14px}
+
+  /* ---------- tooltip ---------- */
+  [data-tip]{position:relative}
+  [data-tip]::after{
+    content:attr(data-tip);
+    position:absolute;left:50%;bottom:calc(100% + 7px);
+    transform:translateX(-50%) translateY(3px) scale(.96);
+    background:rgba(23,25,28,.92);color:#fff;font-size:11px;font-weight:500;line-height:1;
+    padding:6px 9px;border-radius:6px;white-space:nowrap;pointer-events:none;
+    opacity:0;transition:opacity .13s,transform .13s;z-index:90;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  [data-tip]::before{
+    content:"";position:absolute;left:50%;bottom:calc(100% + 2px);
+    transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(23,25,28,.92);
+    opacity:0;transition:opacity .13s;pointer-events:none;z-index:90;
+  }
+  [data-tip]:hover::after,[data-tip]:hover::before,
+  [data-tip]:focus-visible::after,[data-tip]:focus-visible::before{opacity:1}
+  [data-tip]:hover::after,[data-tip]:focus-visible::after{transform:translateX(-50%) translateY(0) scale(1)}
+  [data-tip]:hover::before,[data-tip]:focus-visible::before{transform:translateX(-50%)}
+
+  /* 播放栏占位类：出现时给页面底部留出空间 */
+  body.pad-player{padding-bottom:calc(var(--player-h) + 28px)}
+
+  /* ---------- 顶部导航（深色第一行 / 品牌绿第二行） ---------- */
+  .topbar{position:sticky;top:0;z-index:50;height:var(--top-h);background:#0B1320}
+  .trow{width:100%;background:#0B1320}
+  .trow1{height:70px;display:flex;align-items:center}
+  .trow1-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:38px;width:100%}
+  .trow2{height:48px;display:flex;align-items:center;background:#2CC285}
+  .trow2-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:4px;width:100%}
+  .logo{flex:none;line-height:0;display:flex;align-items:center;gap:8px}
+  .logo-text{font-size:22px;font-weight:700;color:#fff;line-height:1}
+  .logo img{display:block;height:30px;width:auto}
+  .logo:hover{opacity:.9}
+  .tnav{display:flex;align-items:center;gap:6px}
+  .tlink{display:block;height:70px;line-height:70px;padding:0 13px;font-size:15px;color:rgba(255,255,255,.78);text-decoration:none;white-space:nowrap;transition:color .12s}
+  .tlink:hover{color:#fff}
+  .tlink.active{color:#fff;font-weight:700}
+  .trow2 .tlink{height:48px;line-height:48px;padding:0 15px;color:#fff;position:relative}
+  .trow2 .tlink:hover{color:#fff;background:rgba(0,0,0,.12)}
+  .trow2 .tlink.active{color:#fff;font-weight:700}
+  .trow2 .tlink.active::after{content:"";position:absolute;left:15px;right:15px;bottom:3px;height:3px;border-radius:2px;background:#fff}
+  .tnav2{margin-left:0}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:14px;flex:none}
+  .top-search{display:flex;align-items:center;gap:6px;width:210px;height:34px;padding:0 13px;border-radius:17px;border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
+  .top-search input{flex:1;min-width:0;border:none;background:none;outline:none;font-size:13px;color:#fff}
+  .top-search input::placeholder{color:rgba(255,255,255,.5)}
+  .top-search:focus-within{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.14)}
+  .t-login{font-size:14px;color:rgba(255,255,255,.85);text-decoration:none;white-space:nowrap}
+  .t-login:hover{color:#fff}
+  .btn-vip{height:32px;padding:0 15px;border-radius:16px;background:linear-gradient(90deg,#2BC181,#14C496);color:#fff;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:4px;text-decoration:none;white-space:nowrap;box-shadow:0 4px 12px rgba(44,194,133,.45)}
+  .btn-vip:hover{background:linear-gradient(90deg,#24B272,#10B88A);color:#fff}
+  .t-charge{font-size:14px;color:rgba(255,255,255,.85);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:2px}
+  .t-charge:hover{color:#fff}
+
+  /* ---------- 整体布局 ---------- */
+  .layout{
+    max-width:1180px;margin:0 auto;padding:22px 20px 40px;
+    display:grid;grid-template-columns:216px minmax(0,1fr);gap:26px;align-items:start;
+  }
+
+  /* ---------- 左侧导航 ---------- */
+  .rail{
+    position:sticky;top:calc(var(--top-h) + 20px);
+    background:#fff;border:1px solid var(--hairline);border-radius:var(--radius-m);
+    padding:14px 10px 10px;
+  }
+  .rail-search{
+    display:flex;align-items:center;gap:8px;margin:0 4px 12px;
+    padding:7px 11px;background:var(--bg);border-radius:18px;color:var(--ink-3);
+    border:1px solid transparent;transition:border .15s;
+  }
+  .rail-search:focus-within{border-color:var(--brand);background:#fff}
+  .rail-search input{
+    border:none;background:none;outline:none;flex:1;font-size:13px;color:var(--ink);min-width:0;
+  }
+  .rail-search input::placeholder{color:var(--ink-4)}
+  .group+.group{margin-top:8px}
+  .group-head{
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    padding:8px 10px;font-size:12px;color:var(--ink-3);font-weight:600;letter-spacing:.4px;
+    border-radius:6px;gap:8px;
+  }
+  .group-head:hover{background:var(--bg);color:var(--ink-2)}
+  .group-head .chev{
+    transition:transform .22s cubic-bezier(.3,.8,.3,1);color:var(--ink-4);flex:none;
+  }
+  /* 展开：箭头朝下；收起：箭头朝右 → 清晰区分开合状态 */
+  .group.collapsed .group-head .chev{transform:rotate(-90deg);color:var(--ink-3)}
+  .group:not(.collapsed) .group-head .chev{transform:rotate(0deg);color:var(--brand)}
+  .group-items{overflow:hidden;display:flex;flex-direction:column;gap:1px;padding-top:1px}
+  .group.collapsed .group-items{display:none}
+  .list-link{
+    display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+    padding:7px 10px;border-radius:8px;font-size:14px;color:var(--ink-2);
+    border-left:3px solid transparent;transition:background .12s,color .12s;
+  }
+  .list-link:hover{background:var(--bg);color:var(--ink)}
+  .list-link.active{
+    background:var(--brand-soft);color:var(--brand);font-weight:600;border-left-color:var(--brand);
+  }
+  .list-link .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.35;flex:none}
+  .list-link .cnt{margin-left:auto;font-size:11px;color:var(--ink-4)}
+  .rail-empty{color:var(--ink-3);font-size:13px;padding:12px 10px}
+
+  /* ---------- 主内容 ---------- */
+  .main{background:#fff;border:1px solid var(--hairline);border-radius:var(--radius-m);overflow:hidden}
+  .main-pad{padding:22px 26px 8px}
+  .chart-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 18px}
+  .chart-title-wrap{display:flex;flex-direction:column;gap:7px}
+  .chart-name{font-size:26px;font-weight:800;letter-spacing:.3px}
+  .chart-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .time-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);
+    background:var(--bg);padding:4px 11px;border-radius:14px;
+  }
+  .time-pill svg{color:var(--brand)}
+  .rule-btn{font-size:13px;color:var(--ink-3);display:inline-flex;align-items:center;gap:4px;padding:4px 6px;border-radius:6px}
+  .rule-btn:hover{color:var(--brand);background:var(--brand-softer)}
+  .chart-actions{margin-left:auto;display:flex;align-items:center;gap:10px;padding-bottom:2px}
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 20px;border-radius:19px;
+    font-size:14px;font-weight:600;transition:all .15s;white-space:nowrap;
+  }
+  .btn-primary{background:linear-gradient(90deg,#2BC181,#14C496);color:#fff;box-shadow:0 4px 12px rgba(49,194,124,.3)}
+  .btn-primary:hover{background:linear-gradient(90deg,#24B272,#10B88A);box-shadow:0 6px 16px rgba(49,194,124,.4)}
+  .btn-primary:active{background:linear-gradient(90deg,#1FA863,#0DA37D)}
+  .btn-ghost{border:1px solid var(--hairline);color:var(--ink-2);background:#fff}
+  .btn-ghost:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-softer)}
+  .btn-ghost.is-playing{border-color:var(--brand);color:var(--brand)}
+  .menu-wrap{position:relative}
+  .btn-icon{
+    width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--hairline);color:var(--ink-2);background:#fff;transition:all .15s;
+  }
+  .btn-icon:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-softer)}
+  .dropdown{
+    position:absolute;right:0;top:calc(100% + 6px);z-index:40;min-width:150px;
+    background:#fff;border:1px solid var(--hairline);border-radius:var(--radius-m);box-shadow:var(--shadow);
+    padding:6px;display:none;
+  }
+  .dropdown.open{display:block}
+  .dropdown button{
+    display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 11px;
+    font-size:13.5px;color:var(--ink-2);border-radius:7px;
+  }
+  .dropdown button:hover{background:var(--bg);color:var(--ink)}
+
+  /* 批量模式 */
+  .batch-bar{
+    display:none;align-items:center;gap:12px;margin:-8px 0 14px;padding:10px 14px;
+    background:var(--brand-soft);border-radius:var(--radius-m);color:var(--ink);
+  }
+  .batch-bar.show{display:flex}
+  .batch-bar .n{font-weight:700;color:var(--brand)}
+  .batch-bar .mini{
+    display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 13px;border-radius:15px;
+    font-size:13px;font-weight:600;background:#fff;color:var(--ink-2);border:1px solid var(--hairline);
+  }
+  .batch-bar .mini:hover{border-color:var(--brand);color:var(--brand)}
+  .batch-bar .spacer{flex:1}
+
+  /* ---------- 歌曲列表 ---------- */
+  .list{width:100%}
+  .list-head,.song-row{
+    display:grid;
+    grid-template-columns:58px 78px 64px minmax(0,1fr) 150px 52px 118px;
+    align-items:center;column-gap:14px;
+  }
+  .list-head{padding:10px 26px;font-size:12px;color:var(--ink-4);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+  .song-row{
+    padding:9px 26px;border-bottom:1.5px dashed #e4e9ee;position:relative;
+    transition:box-shadow .15s;cursor:pointer;
+  }
+  .song-row:last-child{border-bottom:none}
+  .song-row:hover{box-shadow:0 3px 12px rgba(0,0,0,.08);z-index:2}
+  .song-row:nth-child(-n+3){background:linear-gradient(90deg,#F4FAF6 0%,#FBFDFC 60%,rgba(255,255,255,0) 92%);border-bottom-color:#bfe3cf}
+  .rank-cell{display:flex;align-items:center;gap:4px}
+  .rank-num{font-size:15px;font-weight:700;width:22px;text-align:center;font-variant-numeric:tabular-nums}
+  .rank-badge{width:30px;height:20px;object-fit:contain;flex:none}
+  .song-row:nth-child(-n+3) .rank-num{color:var(--brand)}
+  .play-hint{display:none;color:var(--brand);align-items:center;justify-content:center}
+  /* 悬浮时序号保留，播放icon出现在序号之后 */
+  .song-row:hover .play-hint{display:inline-flex}
+  .song-row:hover .eq{display:none}
+  .song-row.playing:not(:hover) .eq{display:flex}
+  .song-row.playing:hover .play-hint{display:inline-flex}
+  .eq{display:none;align-items:flex-end;gap:2px;height:14px;width:14px}
+  .eq span{width:2.5px;background:var(--brand);border-radius:1px;animation:eq 1s ease-in-out infinite}
+  .eq span:nth-child(1){height:60%}
+  .eq span:nth-child(2){height:100%;animation-delay:.2s}
+  .eq span:nth-child(3){height:45%;animation-delay:.4s}
+  @keyframes eq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .trend{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .trend.up{color:var(--brand)}
+  .trend.down{color:var(--ink-4);font-weight:600}
+  .trend.new{
+    display:inline-flex;align-items:center;justify-content:center;width:26px;height:18px;
+    background:var(--new-bg);color:var(--brand);border-radius:5px;font-size:12px;
+  }
+  .song-main{display:flex;align-items:center;gap:12px;min-width:0}
+  .cover{
+    width:52px;height:52px;border-radius:var(--radius-s);flex:none;position:relative;
+    display:grid;place-items:center;color:rgba(255,255,255,.92);font-size:22px;
+    overflow:hidden;
+  }
+  .cover .ring{position:absolute;inset:0;border:1px solid rgba(255,255,255,.25);z-index:3}
+  .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+  .cover .cnote{position:relative;z-index:1}
+  .song-tt{display:flex;align-items:center;gap:7px;min-width:0}
+  .song-name{
+    font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .song-row.playing .song-name{color:var(--brand)}
+  .tags{display:flex;gap:4px;flex:none}
+  .tag{
+    font-size:10px;line-height:1;padding:3px 4px;border-radius:3px;font-weight:600;flex:none;
+  }
+  .tag.vip{color:#c7871d;background:#fdf3dd;border:1px solid #f3e2b8}
+  .tag.sq{color:var(--ink-3);background:var(--bg);border:1px solid var(--hairline)}
+  .song-sub{font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .artist-cell{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .artist-cell em{font-style:normal;color:var(--ink-4)}
+  .dur{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;text-align:left}
+  .row-ops{display:flex;align-items:center;justify-content:flex-end;gap:2px;opacity:0;transition:opacity .12s}
+  .song-row:hover .row-ops,.song-row:focus-within .row-ops{opacity:1}
+  .op-btn{
+    width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    color:var(--ink-2);transition:all .12s;position:relative;
+  }
+  .op-btn:hover{color:var(--brand);background:#fff;box-shadow:0 2px 8px rgba(23,25,28,.08)}
+  .op-btn.liked{color:var(--heart)}
+  .op-btn.liked:hover{color:var(--heart)}
+  .op-btn.liked .fill{display:block}
+  .op-btn .fill{display:none}
+  .check-cell{display:none}
+  .batch-on .check-cell{display:flex;align-items:center}
+  .batch-on .rank-num,.batch-on .play-hint,.batch-on .eq{display:none}
+  .batch-on .song-row.playing .eq{display:none}
+  .cb{
+    width:18px;height:18px;border-radius:4px;border:1.5px solid var(--ink-4);flex:none;
+    display:inline-flex;align-items:center;justify-content:center;color:#fff;transition:all .12s;
+  }
+  .cb.on{background:var(--brand);border-color:var(--brand)}
+  .row-menu{
+    position:absolute;right:26px;top:calc(100% - 4px);z-index:30;min-width:140px;
+    background:#fff;border:1px solid var(--hairline);border-radius:var(--radius-m);box-shadow:var(--shadow);
+    padding:6px;display:none;
+  }
+  .row-menu.open{display:block}
+  .row-menu button{
+    display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:7px 10px;font-size:13px;
+    color:var(--ink-2);border-radius:6px;
+  }
+  .row-menu button:hover{background:var(--bg);color:var(--ink)}
+
+  .load-wrap{padding:18px 0 6px;text-align:center}
+  .load-more{
+    display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 22px;border-radius:18px;
+    border:1px solid var(--hairline);color:var(--ink-2);font-size:13.5px;background:#fff;
+  }
+  .load-more:hover{border-color:var(--brand);color:var(--brand)}
+  .load-more.loading{color:var(--ink-4);pointer-events:none}
+
+  /* 骨架屏 */
+  .skel-row{display:grid;grid-template-columns:58px 78px 64px minmax(0,1fr) 150px 52px 118px;gap:14px;padding:11px 26px;align-items:center}
+  .skel-row:first-child{border-top:1px solid var(--hairline)}
+  .sk{background:linear-gradient(90deg,#f0f1f3 25%,#f7f8fa 50%,#f0f1f3 75%);background-size:200% 100%;animation:shine 1.2s infinite;border-radius:5px}
+  .sk.rk{width:22px;height:14px}.sk.tr{width:34px;height:13px}.sk.cv{width:52px;height:52px;border-radius:6px}
+  .sk.sg{width:60%;height:14px;margin-bottom:7px}.sk.ar{width:45%;height:11px}.sk.du{width:34px;height:12px}
+  @keyframes shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* 空状态 */
+  .empty{display:none;flex-direction:column;align-items:center;gap:12px;padding:64px 20px;text-align:center}
+  .empty.show{display:flex}
+  .empty-art{width:96px;height:96px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:44px;color:var(--ink-4)}
+  .empty-t{font-size:15px;color:var(--ink-2)}
+
+  /* ---------- 底部播放器（网易云式滑出） ---------- */
+  .player{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;height:var(--player-h);
+    background:#0B1320;backdrop-filter:blur(12px);
+    border-top:1px solid #1a2535;box-shadow:0 -8px 24px rgba(0,0,0,.35);
+    transform:translateY(105%);
+    transition:transform .6s cubic-bezier(.3,.7,.2,1);
+    will-change:transform;
+  }
+  .player.show{
+    transform:translateY(0);
+    transition:transform .22s ease-out;
+  }
+  .player .player-in{max-width:1180px;margin:0 auto;height:100%;padding:0 20px;display:flex;align-items:center;gap:14px}
+  /* 未播放任何歌曲时：只显示一条提示条 */
+  .player.empty .player-in{visibility:hidden}
+  .p-cover{width:44px;height:44px;border-radius:8px;flex:none;display:grid;place-items:center;color:rgba(255,255,255,.9);font-size:18px;position:relative;overflow:hidden}
+  .p-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+  .p-cover .cnote{position:relative;z-index:1}
+  .p-meta{min-width:0;max-width:250px}
+  .p-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-artist{font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-ctrl{display:flex;align-items:center;gap:6px}
+  .p-btn{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);transition:all .12s}
+  .p-btn:hover{color:#2CC285;background:rgba(255,255,255,.1)}
+  .p-btn.main{width:36px;height:36px;background:linear-gradient(90deg,#2BC181,#14C496);color:#fff;box-shadow:0 4px 10px rgba(49,194,124,.35)}
+  .p-btn.main:hover{background:linear-gradient(90deg,#24B272,#10B88A)}
+  .p-progress{flex:1;display:flex;align-items:center;gap:12px;min-width:120px}
+  .p-time{font-size:12px;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums;width:40px}
+  .p-time.r{text-align:right}
+  .bar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.16);cursor:pointer;position:relative}
+  .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--brand);width:0%}
+  .bar-fill::after{content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.15);opacity:0;transition:opacity .12s}
+  .bar:hover .bar-fill::after{opacity:1}
+  .p-side{display:flex;align-items:center;gap:8px;margin-left:6px}
+  .vol{display:flex;align-items:center;gap:7px;width:104px;flex:none}
+  .vol .bar{flex:1}
+  .vol .bar-fill{background:rgba(255,255,255,.5)}
+  .vol .bar-fill::after{border-color:rgba(255,255,255,.5)}
+  .p-div{width:1px;height:22px;background:rgba(255,255,255,.15);flex:none}
+  .p-pin{color:rgba(255,255,255,.6)}
+  .p-pin:hover{color:#2CC285}
+  .p-pin.pinned{color:#2CC285}
+  .p-collapse{color:rgba(255,255,255,.6)}
+  .p-collapse:hover{color:#2CC285}
+  .empty-peek{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    gap:10px;color:rgba(255,255,255,.65);font-size:13.5px;
+  }
+  .empty-peek .peek-note{opacity:.85}
+  .player.empty .empty-peek{display:flex}
+
+  /* ---------- 悬浮工具（位置跟随播放栏是否常驻） ---------- */
+  .float-tools{
+    position:fixed;right:26px;bottom:24px;display:flex;flex-direction:column;gap:10px;z-index:55;
+    transition:bottom .3s;
+  }
+  body.pad-player .float-tools{bottom:calc(var(--player-h) + 26px)}
+  .ft-btn{
+    width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid var(--hairline);
+    box-shadow:0 4px 14px rgba(23,25,28,.1);display:inline-flex;align-items:center;justify-content:center;
+    color:var(--ink-2);transition:all .15s;opacity:0;pointer-events:none;transform:translateY(8px);
+  }
+  .ft-btn.show{opacity:1;pointer-events:auto;transform:none}
+  .ft-btn:hover{color:var(--brand);border-color:var(--brand)}
+  .ft-btn.top-visible{opacity:1;pointer-events:auto;transform:none}
+
+  /* ---------- 弹窗 / Toast ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(17,19,21,.45);z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.open{display:flex}
+  .modal{
+    width:min(440px,100%);background:#fff;border-radius:var(--radius-l);padding:22px 22px 18px;
+    animation:pop .18s ease-out;
+  }
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .modal-h b{font-size:17px}
+  .modal-x{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3)}
+  .modal-x:hover{background:var(--bg);color:var(--ink)}
+  .modal-body{font-size:14px;color:var(--ink-2);line-height:1.7}
+  .pl-new{display:flex;gap:8px;margin-bottom:12px}
+  .pl-new input{
+    flex:1;height:36px;border:1px solid var(--hairline);border-radius:8px;padding:0 12px;font-size:13.5px;outline:none;
+  }
+  .pl-new input:focus{border-color:var(--brand)}
+  .pl-new button{height:36px;padding:0 16px;border-radius:8px;background:linear-gradient(90deg,#2BC181,#14C496);color:#fff;font-weight:600;font-size:13.5px}
+  .pl-new button:hover{background:linear-gradient(90deg,#24B272,#10B88A)}
+  .pl-list{display:flex;flex-direction:column;max-height:260px;overflow:auto;gap:2px}
+  .pl-item{
+    display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;
+    border:1px solid transparent;transition:all .12s;
+  }
+  .pl-item:hover{background:var(--bg)}
+  .pl-item.sel{border-color:var(--brand);background:var(--brand-softer)}
+  .pl-icon{width:34px;height:34px;border-radius:7px;background:var(--bg);display:grid;place-items:center;color:var(--brand);overflow:hidden}
+  .pl-icon img{width:100%;height:100%;object-fit:cover}
+  .pl-name{flex:1;font-size:14px;color:var(--ink)}
+  .pl-cnt{font-size:12px;color:var(--ink-3)}
+  .modal-ft{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hairline)}
+  .rules-list{display:flex;flex-direction:column;gap:14px}
+  .rules-item b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
+  .rules-item span{color:var(--ink-2);font-size:13.5px}
+
+  #toasts{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;transition:bottom .3s}
+  body.pad-player #toasts{bottom:calc(var(--player-h) + 22px)}
+  .toast{
+    background:rgba(23,25,28,.92);color:#fff;font-size:13.5px;padding:9px 18px;border-radius:20px;
+    box-shadow:0 6px 18px rgba(0,0,0,.18);animation:tin .2s ease-out;
+  }
+  .toast.out{opacity:0;transition:opacity .3s}
+  @keyframes tin{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+  /* ---------- 评论区（参考素材格式：标签+输入框+条目+分页） ---------- */
+  .comments{padding:0 26px;border-top:1px solid var(--hairline)}
+  .comments-head{display:flex;align-items:center;justify-content:space-between;padding:16px 0 12px}
+  .comments-title{font-size:16px;font-weight:600;color:var(--ink)}
+  .c-count{font-size:13px;font-weight:400;color:var(--ink-3);margin-left:4px}
+  .c-tabs{display:flex;gap:18px}
+  .c-tab{font-size:13px;color:var(--ink-3);cursor:pointer;padding:4px 2px;position:relative}
+  .c-tab.active{color:var(--brand);font-weight:600}
+  .c-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--brand)}
+  .c-input-wrap{display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--bg);border-radius:var(--radius-m);margin-bottom:6px}
+  .c-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3ddc92,#1fb168);color:#fff;display:grid;place-items:center;font-size:16px;flex:none;overflow:hidden;position:relative}
+  .c-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .c-input-box{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+  .c-input-box textarea{flex:1;border:none;background:none;outline:none;resize:none;font-size:14px;color:var(--ink);font-family:inherit;line-height:1.4;height:22px;padding:0}
+  .c-submit{height:28px;padding:0 14px;border-radius:14px;background:linear-gradient(90deg,#2BC181,#14C496);color:#fff;font-size:13px;font-weight:600;flex:none}
+  .c-submit:hover{background:linear-gradient(90deg,#24B272,#10B88A)}
+  .c-submit:disabled{background:#d3d8dc;cursor:not-allowed}
+  .c-item{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid #f2f3f4}
+  .c-item .c-avatar{width:38px;height:38px;font-size:16px}
+  .c-main{flex:1;min-width:0}
+  .c-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .c-user{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+  .vip{font-size:10px;color:#c7871d;background:#fdf3dd;border:1px solid #f3e2b8;border-radius:3px;padding:1px 4px;font-weight:600;line-height:1.2}
+  .c-time{font-size:12px;color:var(--ink-4)}
+  .c-text{font-size:14px;color:var(--ink);line-height:1.7}
+  .c-actions{display:flex;align-items:center;gap:18px;margin-top:8px}
+  .c-like{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:4px;cursor:pointer}
+  .c-like.liked{color:var(--heart)}
+  .c-like:hover{color:var(--brand)}
+  .c-reply{font-size:12px;color:var(--ink-3);cursor:pointer}
+  .c-reply:hover{color:var(--brand)}
+  .c-pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:18px 0 6px}
+  .page-btn{min-width:30px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--hairline);background:#fff;color:var(--ink-2);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .page-btn:hover{border-color:var(--brand);color:var(--brand)}
+  .page-btn.active{background:linear-gradient(90deg,#2BC181,#14C496);border-color:transparent;color:#fff;font-weight:600}
+  .page-btn.disabled{color:var(--ink-4);cursor:default;pointer-events:none}
+  .page-ellipsis{color:var(--ink-3);padding:0 2px}
+
+  /* ---------- 页脚 ---------- */
+  .footer{background:#0B1320;color:#999;margin-top:40px}
+  .footer-in{max-width:1180px;margin:0 auto;padding:30px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px}
+  .footer-col h4{color:#fff;font-size:14px;margin-bottom:14px;font-weight:600}
+  .footer-col a{display:block;color:#999;font-size:13px;margin-bottom:9px;text-decoration:none}
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{max-width:1180px;margin:0 auto;padding:16px 20px 26px;font-size:12px;color:#777;line-height:1.9;border-top:1px solid #444}
+  .footer-bottom a{color:#999;text-decoration:none}
+  .footer-bottom a:hover{color:#fff}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+  @media (max-width:960px){
+    .layout{grid-template-columns:1fr;padding-top:12px}
+    .rail{position:static}
+    .song-row,.list-head{grid-template-columns:50px 70px 56px minmax(0,1fr) auto;column-gap:10px}
+    .list-head .h-artist,.list-head .h-dur,.song-row .artist-cell,.song-row .dur{display:none}
+    .skel-row{grid-template-columns:50px 70px 56px minmax(0,1fr) auto}
+  }
+  @media (max-width:680px){
+    .trow1-in,.trow2-in{padding:0 12px}
+    .tlink{padding:6px 9px;font-size:13px}
+    .trow1-in{gap:10px}
+    .top-search{display:none}
+    .tnav2{margin-left:0}
+    .trow2-in{overflow-x:auto;scrollbar-width:none}
+    .logo img{height:22px}
+    .main-pad{padding:16px 14px 6px}
+    .song-row,.list-head{padding-left:14px;padding-right:14px;grid-template-columns:40px 64px minmax(0,1fr) auto;column-gap:8px}
+    .list-head .h-trend,.song-row .trend-cell{display:none}
+    .chart-actions{margin-left:0;width:100%;padding-bottom:6px}
+    .row-ops{opacity:1}
+    .player-in{gap:10px;padding:0 10px}
+    .vol{display:none}
+    .p-meta{max-width:120px}
+  }
+</style>
+</head>
+<body class="">
+
+<!-- SVG 图标库 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.8v12.4c0 .8.9 1.3 1.6.9l9.6-6.2c.6-.4.6-1.4 0-1.8L9.6 4.9C8.9 4.5 8 5 8 5.8z" fill="currentColor"></path></symbol>
+    <symbol id="i-play-cir" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M9.1 8.7 L9.1 15.3 L15.3 12 Z" fill="currentColor"></path></symbol>
+    <symbol id="i-pause-cir" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.4" fill="none" stroke="currentColor" stroke-width="1.5"></circle><rect x="9" y="8.2" width="2.2" height="7.6" rx="1.1" fill="currentColor"></rect><rect x="12.8" y="8.2" width="2.2" height="7.6" rx="1.1" fill="currentColor"></rect></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="1.8" fill="currentColor"></rect></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z" fill="currentColor"></path></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.6" height="14" rx="1.4" fill="currentColor"></rect><rect x="13.9" y="5" width="3.6" height="14" rx="1.4" fill="currentColor"></rect></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6.5 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path><path d="M18 6.8v10.4c0 .8-.9 1.3-1.6.8l-8-5.2a1 1 0 0 1 0-1.6l8-5.2c.7-.5 1.6 0 1.6.8z" fill="currentColor"></path></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M17.5 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path><path d="M6 6.8v10.4c0 .8.9 1.3 1.6.8l8-5.2a1 1 0 0 0 0-1.6l-8-5.2C6.9 5.5 6 6 6 6.8z" fill="currentColor"></path></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.3C6.5 16.6 3.4 13.4 3.4 9.9 3.4 7.2 5.4 5.2 8 5.2c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.6 0 4.6 2 4.6 4.7 0 3.5-3.1 6.7-8.6 10.4z" fill="none" stroke="currentColor" stroke-width="1.8"></path></symbol>
+    <symbol id="i-heart-fill" viewBox="0 0 24 24"><path d="M12 20.3C6.5 16.6 3.4 13.4 3.4 9.9 3.4 7.2 5.4 5.2 8 5.2c1.6 0 3 .8 4 2 1-1.2 2.4-2 4-2 2.6 0 4.6 2 4.6 4.7 0 3.5-3.1 6.7-8.6 10.4z" fill="currentColor"></path></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.7" fill="currentColor"></circle><circle cx="12" cy="12" r="1.7" fill="currentColor"></circle><circle cx="18.5" cy="12" r="1.7" fill="currentColor"></circle></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.2" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M15.5 15.5 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9.5v5a1 1 0 0 0 1 1h3l4.2 3.4c.6.5 1.3 0 1.3-.8V6.9c0-.8-.7-1.3-1.3-.8L8 9.5H5a1 1 0 0 0-1 1z" fill="currentColor"></path><path d="M16.5 9a5 5 0 0 1 0 6M19 6.5a8.5 8.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="M8 9h8M8 12.5h8M8 16h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="m8.5 13.5 3.5-3.5 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 2-2h12v16H7a2 2 0 0 0-2 2V5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M5 19a2 2 0 0 1 2-2h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></symbol>
+  </defs>
+</svg>
+
+<!-- 顶部导航（浅色双行） -->
+<header class="topbar">
+  <div class="trow trow1">
+    <div class="trow1-in">
+      <a class="logo" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false"><img src="./排行榜 · QQ音乐改版原型（最终）_files/logo_icon.png" alt=""><span class="logo-text">QQ音乐</span></a>
+      <nav class="tnav" aria-label="主导航">
+        <a class="tlink active" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">音乐馆</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">我的音乐</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">客户端</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">开放平台</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">VIP</a>
+      </nav>
+      <div class="top-right">
+        <div class="top-search" role="search">
+          <svg class="icon icon-sm"><use href="#i-search"></use></svg>
+          <input type="text" placeholder="搜索音乐、MV、歌单、用户" aria-label="搜索">
+        </div>
+        <a class="t-login" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">登录</a>
+        <a class="btn-vip" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">开通VIP<svg class="icon icon-sm"><use href="#i-chev"></use></svg></a>
+        <a class="t-charge" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">充值<svg class="icon icon-sm"><use href="#i-chev"></use></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="trow trow2">
+    <div class="trow2-in">
+      <nav class="tnav tnav2" aria-label="音乐馆栏目">
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">首页</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">歌手</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">新碟</a>
+        <a class="tlink active" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">排行榜</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">分类歌单</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">雷达</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">MV</a>
+        <a class="tlink" href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#" onclick="return false">数字专辑</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 左侧榜单导航 -->
+  <aside class="rail" aria-label="榜单分类导航">
+    <div class="rail-search">
+      <svg class="icon icon-sm"><use href="#i-search"></use></svg>
+      <input id="railQuery" type="text" placeholder="搜索榜单" aria-label="搜索榜单">
+    </div>
+    <div id="railGroups"><div class="group"><button class="group-head" aria-expanded="true"><span>推荐榜</span><svg class="icon icon-sm chev" aria-hidden="true"><use href="#i-chev"></use></svg></button><div class="group-items"><button class="list-link active" data-id="bq"><span class="dot"></span>飙升榜<span class="cnt">25</span></button><button class="list-link" data-id="hot"><span class="dot"></span>热歌榜<span class="cnt">22</span></button><button class="list-link" data-id="new"><span class="dot"></span>新歌榜<span class="cnt">16</span></button><button class="list-link" data-id="pop"><span class="dot"></span>流行指数榜<span class="cnt">16</span></button><button class="list-link" data-id="mv"><span class="dot"></span>MV 榜<span class="cnt">14</span></button></div></div><div class="group collapsed"><button class="group-head" aria-expanded="false"><span>地区榜</span><svg class="icon icon-sm chev" aria-hidden="true"><use href="#i-chev"></use></svg></button><div class="group-items"><button class="list-link" data-id="cn"><span class="dot"></span>内地榜<span class="cnt">14</span></button><button class="list-link" data-id="hk"><span class="dot"></span>香港榜<span class="cnt">12</span></button><button class="list-link" data-id="tw"><span class="dot"></span>台湾榜<span class="cnt">12</span></button><button class="list-link" data-id="us"><span class="dot"></span>欧美榜<span class="cnt">12</span></button><button class="list-link" data-id="kr"><span class="dot"></span>韩国榜<span class="cnt">12</span></button><button class="list-link" data-id="jp"><span class="dot"></span>日本榜<span class="cnt">12</span></button></div></div><div class="group collapsed"><button class="group-head" aria-expanded="false"><span>特色榜</span><svg class="icon icon-sm chev" aria-hidden="true"><use href="#i-chev"></use></svg></button><div class="group-items"><button class="list-link" data-id="rap"><span class="dot"></span>说唱榜<span class="cnt">12</span></button><button class="list-link" data-id="edm"><span class="dot"></span>电音榜<span class="cnt">12</span></button><button class="list-link" data-id="game"><span class="dot"></span>游戏榜<span class="cnt">12</span></button><button class="list-link" data-id="anim"><span class="dot"></span>动漫榜<span class="cnt">12</span></button><button class="list-link" data-id="film"><span class="dot"></span>影视榜<span class="cnt">12</span></button><button class="list-link" data-id="ktv"><span class="dot"></span>K歌榜<span class="cnt">12</span></button></div></div><div class="group collapsed"><button class="group-head" aria-expanded="false"><span>全球榜</span><svg class="icon icon-sm chev" aria-hidden="true"><use href="#i-chev"></use></svg></button><div class="group-items"><button class="list-link" data-id="gus"><span class="dot"></span>美国榜<span class="cnt">12</span></button><button class="list-link" data-id="gkr"><span class="dot"></span>韩国全球榜<span class="cnt">12</span></button><button class="list-link" data-id="guk"><span class="dot"></span>英国榜<span class="cnt">12</span></button><button class="list-link" data-id="gjp"><span class="dot"></span>日本全球榜<span class="cnt">12</span></button></div></div></div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="main" id="main">
+    <div class="main-pad">
+      <div class="chart-head">
+        <div class="chart-title-wrap">
+          <h1 class="chart-name" id="chartName">飙升榜</h1>
+          <div class="chart-meta">
+            <span class="time-pill"><svg class="icon icon-sm"><use href="#i-clock"></use></svg><span id="chartTime">今日榜单 · 09:30 更新</span></span>
+            <button class="rule-btn" id="ruleBtn"><svg class="icon icon-sm"><use href="#i-book"></use></svg>榜单规则</button>
+          </div>
+        </div>
+        <div class="chart-actions">
+          <button class="btn btn-primary" id="playAllBtn"><svg class="icon"><use href="#i-play"></use></svg><span id="playAllLabel">播放全部</span></button>
+          <button class="btn btn-ghost" id="addAllBtn"><svg class="icon"><use href="#i-plus"></use></svg>添加到歌单</button>
+          <div class="menu-wrap">
+            <button class="btn-icon" id="moreBtn" aria-label="更多榜单操作" aria-haspopup="true" aria-expanded="false">
+              <svg class="icon"><use href="#i-more"></use></svg>
+            </button>
+            <div class="dropdown" id="moreMenu" role="menu">
+              <button data-act="batch"><svg class="icon icon-sm"><use href="#i-check"></use></svg>批量操作</button>
+              <button data-act="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+              <button data-act="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div class="batch-bar" id="batchBar">
+      <svg class="icon" style="color:var(--brand)"><use href="#i-check"></use></svg>
+      <span>已选 <span class="n" id="selCount">0</span> 首</span>
+      <button class="mini" id="batchPlay">播放</button>
+      <button class="mini" id="batchAdd">加入歌单</button>
+      <span class="spacer"></span>
+      <button class="mini" id="batchCancel">取消</button>
+    </div>
+
+    <div class="main-pad">
+      <div class="list-head" id="listHead">
+        <span>排名</span>
+        <span class="h-trend">趋势</span>
+        <span></span>
+        <span>歌曲</span>
+        <span class="h-artist">歌手 / 专辑</span>
+        <span class="h-dur">时长</span>
+        <span style="text-align:right">操作</span>
+      </div>
+
+      <div id="songList"><div class="song-row" data-key="bq:0">
+    <div class="rank-cell">
+      
+      <img class="rank-badge" src="./排行榜 · QQ音乐改版原型（最终）_files/1.png" alt="1">
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑23</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#43b0c9,#1f7a8f)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/169-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">极光列车</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">北境</div>
+      </div>
+    </div>
+    <div class="artist-cell">周屿</div>
+    <div class="dur">04:23</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:0">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:1">
+    <div class="rank-cell">
+      
+      <img class="rank-badge" src="./排行榜 · QQ音乐改版原型（最终）_files/2.png" alt="2">
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑20</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#f2a35c,#c96f2e)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/118-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">浅夏信笺</span>
+          
+        </div>
+        <div class="song-sub">浅夏信笺</div>
+      </div>
+    </div>
+    <div class="artist-cell">顾子宁</div>
+    <div class="dur">03:16</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:1">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:2">
+    <div class="rank-cell">
+      
+      <img class="rank-badge" src="./排行榜 · QQ音乐改版原型（最终）_files/3.png" alt="3">
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑16</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#f2a35c,#c96f2e)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/514-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">地铁站台</span>
+          
+        </div>
+        <div class="song-sub">通勤</div>
+      </div>
+    </div>
+    <div class="artist-cell">江一舟</div>
+    <div class="dur">03:34</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:2">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:3">
+    <div class="rank-cell">
+      
+      <span class="rank-num">4</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend down">↓3</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#e97a9a,#b04a6e)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/724-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">北纬三十度</span>
+          
+        </div>
+        <div class="song-sub">航线</div>
+      </div>
+    </div>
+    <div class="artist-cell">桑榆</div>
+    <div class="dur">03:36</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:3">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:4">
+    <div class="rank-cell">
+      
+      <span class="rank-num">5</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend"></span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#67b26f,#3a7a42)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/116-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">月光便利店</span>
+          
+        </div>
+        <div class="song-sub">月光便利店</div>
+      </div>
+    </div>
+    <div class="artist-cell">林晚晴</div>
+    <div class="dur">03:45</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:4">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:5">
+    <div class="rank-cell">
+      
+      <span class="rank-num">6</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend down">↓2</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#5b8def,#3557a8)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/268-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">第七个黄昏</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">第七个黄昏</div>
+      </div>
+    </div>
+    <div class="artist-cell">周屿</div>
+    <div class="dur">03:28</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:5">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:6">
+    <div class="rank-cell">
+      
+      <span class="rank-num">7</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑6</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#7c6fe0,#4b40a8)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/61-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">糖果汽水</span>
+          
+        </div>
+        <div class="song-sub">夏日限定</div>
+      </div>
+    </div>
+    <div class="artist-cell">Yuki 林柚</div>
+    <div class="dur">03:02</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:6">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:7">
+    <div class="rank-cell">
+      
+      <span class="rank-num">8</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑9</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#43b0c9,#1f7a8f)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/13-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">山海皆可平</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">山海</div>
+      </div>
+    </div>
+    <div class="artist-cell">陆遥</div>
+    <div class="dur">04:28</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:7">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:8">
+    <div class="rank-cell">
+      
+      <span class="rank-num">9</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend new">新</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#d9607f,#96324f)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/96-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">环形山</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">环形山</div>
+      </div>
+    </div>
+    <div class="artist-cell">孟驰</div>
+    <div class="dur">04:04</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:8">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:9">
+    <div class="rank-cell">
+      
+      <span class="rank-num">10</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑4</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#67b26f,#3a7a42)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/50-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">白噪音</span>
+          
+        </div>
+        <div class="song-sub">白噪音</div>
+      </div>
+    </div>
+    <div class="artist-cell">简遇</div>
+    <div class="dur">04:18</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:9">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:10">
+    <div class="rank-cell">
+      
+      <span class="rank-num">11</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend"></span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#5b8def,#3557a8)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/505-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">无名小巷</span>
+          
+        </div>
+        <div class="song-sub">巷</div>
+      </div>
+    </div>
+    <div class="artist-cell">江一舟</div>
+    <div class="dur">03:39</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:10">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:11">
+    <div class="rank-cell">
+      
+      <span class="rank-num">12</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend new">新</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#c9973f,#8a6423)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/764-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">柠檬气泡水</span>
+          
+        </div>
+        <div class="song-sub">夏日限定</div>
+      </div>
+    </div>
+    <div class="artist-cell">Yuki 林柚</div>
+    <div class="dur">02:59</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:11">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:12">
+    <div class="rank-cell">
+      
+      <span class="rank-num">13</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend new">新</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#7c6fe0,#4b40a8)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/625-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">城市的鲸</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">深蓝</div>
+      </div>
+    </div>
+    <div class="artist-cell">阿澈</div>
+    <div class="dur">04:03</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:12">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:13">
+    <div class="rank-cell">
+      
+      <span class="rank-num">14</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend new">新</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#8e7cc3,#5e4b96)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/615-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">偷星星的人</span>
+          
+        </div>
+        <div class="song-sub">夜行者</div>
+      </div>
+    </div>
+    <div class="artist-cell">陈野</div>
+    <div class="dur">03:46</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:13">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:14">
+    <div class="rank-cell">
+      
+      <span class="rank-num">15</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑1</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#4fac8a,#2f6b52)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/1068-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">无人区玫瑰</span>
+          <span class="tags"><span class="tag vip">VIP</span></span>
+        </div>
+        <div class="song-sub">无人区玫瑰</div>
+      </div>
+    </div>
+    <div class="artist-cell">白鹿晴</div>
+    <div class="dur">04:20</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:14">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:15">
+    <div class="rank-cell">
+      
+      <span class="rank-num">16</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend down">↓1</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#f2a35c,#c96f2e)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/34-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">凌晨三点</span>
+          
+        </div>
+        <div class="song-sub">夜航西飞</div>
+      </div>
+    </div>
+    <div class="artist-cell">阿澈</div>
+    <div class="dur">04:00</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:15">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:16">
+    <div class="rank-cell">
+      
+      <span class="rank-num">17</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend down">↓2</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#3fb8af,#1d6f69)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/319-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">逆光而行</span>
+          
+        </div>
+        <div class="song-sub">逆光</div>
+      </div>
+    </div>
+    <div class="artist-cell">孟驰</div>
+    <div class="dur">03:53</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:16">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:17">
+    <div class="rank-cell">
+      
+      <span class="rank-num">18</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑12</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#4fac8a,#2f6b52)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/852-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">回声</span>
+          
+        </div>
+        <div class="song-sub">深蓝</div>
+      </div>
+    </div>
+    <div class="artist-cell">阿澈</div>
+    <div class="dur">03:56</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:17">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:18">
+    <div class="rank-cell">
+      
+      <span class="rank-num">19</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑8</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#4fac8a,#2f6b52)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/1057-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">晚风与海</span>
+          
+        </div>
+        <div class="song-sub">城市漂流</div>
+      </div>
+    </div>
+    <div class="artist-cell">林晚晴</div>
+    <div class="dur">03:52</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:18">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div><div class="song-row" data-key="bq:19">
+    <div class="rank-cell">
+      
+      <span class="rank-num">20</span>
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"></use></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell"><span class="trend up">↑15</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,#f2a35c,#c96f2e)"><span class="ring"></span><img src="./排行榜 · QQ音乐改版原型（最终）_files/893-104x104.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">晚安诗</span>
+          
+        </div>
+        <div class="song-sub">晚安诗</div>
+      </div>
+    </div>
+    <div class="artist-cell">唐梨</div>
+    <div class="dur">03:12</div>
+    <div class="row-ops">
+      <button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"></use></svg></button>
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"></use></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"></use></svg></button>
+    </div>
+    <div class="row-menu" data-key="bq:19">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"></use></svg>播放</button>
+      <button data-m="fav"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>收藏</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"></use></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"></use></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"></use></svg>分享</button>
+    </div>
+  </div></div>
+      <div id="skelWrap"></div>
+
+      <div class="empty" id="emptyState">
+        <div class="empty-art">♪</div>
+        <p class="empty-t">暂无歌曲，稍后再来看看</p>
+        <button class="btn btn-ghost" id="emptyReload">重新加载</button>
+      </div>
+
+      <div class="load-wrap"><button class="load-more" id="loadMoreBtn">加载更多（已显示 20/25）</button></div>
+    </div>
+
+    <!-- 评论区（参考素材格式：标签+输入框+条目+分页） -->
+    <section class="comments">
+      <div class="comments-head">
+        <span class="comments-title">评论<span class="c-count">共227,635条</span></span>
+        <div class="c-tabs">
+          <span class="c-tab active">精彩评论</span>
+          <span class="c-tab">最新评论</span>
+        </div>
+      </div>
+
+      <div class="c-input-wrap">
+        <div class="c-avatar">♪</div>
+        <div class="c-input-box">
+          <textarea id="cText" placeholder="写下你的评论..." maxlength="300" rows="1"></textarea>
+          <button class="c-submit" id="cSubmit" disabled="">评论</button>
+        </div>
+      </div>
+
+      <div class="c-list" id="cList">
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1015-80x80.jpg" alt="" onerror="this.remove()">老</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">老腊肉已 <span class="vip">VIP</span></span><span class="c-time">2小时前</span></div>
+            <div class="c-text">《0.5x》副歌一响全身鸡皮疙瘩，BikaBreezy 这嗓子太有辨识度了，已经单曲循环一整天。</div>
+            <div class="c-actions"><button class="c-like">♥ 3.2万</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1016-80x80.jpg" alt="" onerror="this.remove()">雾</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">雾都夜话</span><span class="c-time">昨天22:47</span></div>
+            <div class="c-text">郑中基的《闭目入神》老歌回春，直接杀进前三，这就是升榜的含金量。</div>
+            <div class="c-actions"><button class="c-like">♥ 1.8万</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1018-80x80.jpg" alt="" onerror="this.remove()">追</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">追风的少年小陈</span><span class="c-time">3天前</span></div>
+            <div class="c-text">建议从榜单底部往上听，冷门里全是宝藏，第34名那英的《征服》一出来谁顶得住。</div>
+            <div class="c-actions"><button class="c-like">♥ 8642</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1019-80x80.jpg" alt="" onerror="this.remove()">晚</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">晚风邮差</span><span class="c-time">5天前</span></div>
+            <div class="c-text">一路从第89名听上来，听到榜首《0.5x》整个人都被治愈了，这就是榜单的意义吧。</div>
+            <div class="c-actions"><button class="c-like">♥ 5306</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1021-80x80.jpg" alt="" onerror="this.remove()">吉</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">吉他与海 <span class="vip">VIP</span></span><span class="c-time">1周前</span></div>
+            <div class="c-text">数据不会说谎，飙升榜的含金量还在上升。这期Top10我可以循环一周。</div>
+            <div class="c-actions"><button class="c-like">♥ 4217</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+        <div class="c-item">
+          <div class="c-avatar"><img src="./排行榜 · QQ音乐改版原型（最终）_files/1022-80x80.jpg" alt="" onerror="this.remove()">夏</div>
+          <div class="c-main">
+            <div class="c-top"><span class="c-user">夏夜蝉鸣</span><span class="c-time">1周前</span></div>
+            <div class="c-text">评论区人均乐评人，歌还没听完，先看评论看半小时。</div>
+            <div class="c-actions"><button class="c-like">♥ 2981</button><button class="c-reply">回复</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-pagination" id="cPagination">
+        <button class="page-btn disabled">上一页</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="page-ellipsis">...</span>
+        <button class="page-btn">1138</button>
+        <button class="page-btn">下一页</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-col">
+      <h4>下载QQ音乐客户端</h4>
+      <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">PC版</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">Mac版</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">Android版</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">iPhone版</a>
+    </div>
+    <div class="footer-col">
+      <h4>特色产品</h4>
+      <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">全民K歌</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">银河音效</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">TME CONNECT</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">车载互联</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">QQ演出</a>
+    </div>
+    <div class="footer-col">
+      <h4>开放平台 / 合作链接</h4>
+      <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">QQ音乐开放平台</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">腾讯音乐人</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">音乐推-歌曲推广</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">TME Studio</a><a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">臻品音质认证</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>
+      <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">关于腾讯</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">About Tencent</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">服务条款</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">用户服务协议</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">隐私政策</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">权利声明</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">广告服务</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">腾讯招聘</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">客服中心</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">网站导航</a> | <a href="file:///D:/claude%E9%A1%B9%E7%9B%AE/%E7%BD%91%E9%A1%B5%E6%94%B9%E7%89%88/QQ%E9%9F%B3%E4%B9%90%E6%8E%92%E8%A1%8C%E6%A6%9C%E6%94%B9%E7%89%88_%E5%8E%9F%E5%9E%8B.html#">举报</a>
+    </p>
+    <p>Copyright © 1998-2026 Tencent. All Rights Reserved.</p>
+    <p>腾讯公司版权所有 | 营业执照 | 网络文化经营许可证：粤网文（2024）2944-208号 | 出版物经营许可证：新出发深零字第C0812号 | 网络视听许可证1904073号 | 粤ICP备17078037号 | 客服电话：4006016666</p>
+    <p>举报邮箱：tme_musicjubao@tencentmusic.com</p>
+  </div>
+</footer>
+
+<!-- 悬浮工具 -->
+<div class="float-tools" id="floatTools">
+  <button class="ft-btn" id="toTopBtn" aria-label="回顶部" title="回顶部">
+    <svg class="icon"><use href="#i-chev" style="transform:rotate(180deg)"></use></svg>
+  </button>
+</div>
+
+<!-- 底部播放器（网易云式滑出） -->
+<div class="player" id="player" aria-label="底部播放器">
+  <div class="empty-peek">
+    <span style="color:var(--brand);font-size:20px">♪</span>
+    <span class="peek-note">鼠标移到页面底部唤出播放栏，移出后自动收起（无论是否在播放）</span>
+  </div>
+  <div class="player-in">
+    <div class="p-cover" id="pCover" style="background: linear-gradient(135deg, rgb(67, 176, 201), rgb(31, 122, 143));"><img alt="" onerror="this.remove()" src="./排行榜 · QQ音乐改版原型（最终）_files/169-104x104.jpg"><span class="cnote">♪</span></div>
+    <div class="p-meta">
+      <div class="p-name" id="pName">极光列车</div>
+      <div class="p-artist" id="pArtist">周屿</div>
+    </div>
+    <div class="p-ctrl">
+      <button class="p-btn" id="pPrev" data-tip="上一首" aria-label="上一首"><svg class="icon"><use href="#i-prev"></use></svg></button>
+      <button class="p-btn main" id="pToggle" data-tip="播放 / 暂停" aria-label="播放或暂停"><svg class="icon"><use href="#i-play"></use></svg></button>
+      <button class="p-btn" id="pNext" data-tip="下一首" aria-label="下一首"><svg class="icon"><use href="#i-next"></use></svg></button>
+    </div>
+    <div class="p-progress">
+      <span class="p-time" id="pCur">00:00</span>
+      <div class="bar" id="pBar" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <div class="bar-fill" id="pBarFill"></div>
+      </div>
+      <span class="p-time r" id="pDur">00:00</span>
+    </div>
+    <div class="p-side">
+      <button class="p-btn" id="pFav" data-tip="收藏" aria-label="收藏"><svg class="icon" id="pFavIco"><use href="#i-heart"></use></svg></button>
+      <button class="p-btn" id="pAdd" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon"><use href="#i-plus"></use></svg></button>
+      <span class="p-div"></span>
+      <button class="p-btn p-pin" id="pStop" data-tip="订住播放栏" aria-label="订住播放栏"><svg class="icon"><use href="#i-pin"></use></svg></button>
+    </div>
+    <div class="vol">
+      <svg class="icon icon-sm" style="color:var(--ink-3)"><use href="#i-vol"></use></svg>
+      <div class="bar" id="volBar"><div class="bar-fill" id="volFill" style="width:80%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：添加到歌单 -->
+<div class="overlay" id="plOverlay" role="dialog" aria-modal="true" aria-labelledby="plTitle">
+  <div class="modal">
+    <div class="modal-h">
+      <b id="plTitle">添加到歌单</b>
+      <button class="modal-x" data-close="" aria-label="关闭"><svg class="icon icon-sm"><use href="#i-more" style="transform:rotate(45deg)"></use></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="pl-new">
+        <input id="plNewName" type="text" placeholder="新建歌单名称" maxlength="20" aria-label="新建歌单名称">
+        <button id="plNewBtn">新建</button>
+      </div>
+      <div class="pl-list" id="plList"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" data-close="" style="height:34px;padding:0 16px">取消</button>
+      <button class="btn btn-primary" id="plConfirm" style="height:34px;padding:0 20px">确定添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：榜单规则 -->
+<div class="overlay" id="ruleOverlay" role="dialog" aria-modal="true" aria-labelledby="ruleTitle">
+  <div class="modal">
+    <div class="modal-h">
+      <b id="ruleTitle">榜单规则</b>
+      <button class="modal-x" data-close="" aria-label="关闭"><svg class="icon icon-sm"><use href="#i-more" style="transform:rotate(45deg)"></use></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="rules-list">
+        <div class="rules-item">
+          <b id="ruleName">飙升榜 · 更新规则</b>
+          <span id="ruleDesc">统计近 24 小时播放量上升最快的歌曲。</span>
+        </div>
+        <div class="rules-item">
+          <b>更新周期</b>
+          <span>每日更新，统计时间为昨日 00:00 – 24:00。</span>
+        </div>
+        <div class="rules-item">
+          <b>趋势说明</b>
+          <span>↑N 表示较昨日名次上升 N 位；↓N 表示下降；“新”表示新上榜。</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-primary" data-close="" style="height:34px;padding:0 20px">知道了</button></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ================= 数据 ================= */
+const CAT = [
+  {t:"晚风与海", a:"林晚晴", al:"城市漂流", d:232, vip:0},
+  {t:"第七个黄昏", a:"周屿", al:"第七个黄昏", d:208, vip:1},
+  {t:"霓虹轨道", a:"陈野 & 苏芮", al:"午夜电台", d:254, vip:0},
+  {t:"浅夏信笺", a:"顾子宁", al:"浅夏信笺", d:196, vip:0},
+  {t:"城市的鲸", a:"阿澈", al:"深蓝", d:243, vip:1},
+  {t:"雨停之前", a:"Momo 陈默", al:"季风", d:221, vip:0},
+  {t:"星光慢递", a:"江一舟", al:"慢递", d:235, vip:0},
+  {t:"某某", a:"邱叙", al:"某某", d:215, vip:0},
+  {t:"风从海边来", a:"陆遥", al:"岛屿来信", d:248, vip:1},
+  {t:"零度拥抱", a:"唐梨", al:"零度", d:207, vip:0},
+  {t:"一页盛夏", a:"苏芮", al:"一页盛夏", d:189, vip:0},
+  {t:"逆光而行", a:"孟驰", al:"逆光", d:233, vip:0},
+  {t:"无人区玫瑰", a:"白鹿晴", al:"无人区玫瑰", d:260, vip:1},
+  {t:"旧耳机", a:"简遇", al:"旧物", d:224, vip:0},
+  {t:"北纬三十度", a:"桑榆", al:"航线", d:216, vip:0},
+  {t:"凌晨三点", a:"阿澈", al:"夜航西飞", d:240, vip:0},
+  {t:"糖果汽水", a:"Yuki 林柚", al:"夏日限定", d:182, vip:0},
+  {t:"山海皆可平", a:"陆遥", al:"山海", d:268, vip:1},
+  {t:"云朵收集者", a:"邱叙", al:"云上", d:199, vip:0},
+  {t:"月光便利店", a:"林晚晴", al:"月光便利店", d:225, vip:0},
+  {t:"纸上星光", a:"顾子宁", al:"纸上星光", d:211, vip:0},
+  {t:"候鸟南飞", a:"桑榆", al:"候鸟", d:251, vip:0},
+  {t:"拾光者", a:"孟驰", al:"拾光", d:238, vip:0},
+  {t:"橘子海的日落", a:"苏芮", al:"夏末", d:203, vip:0},
+  {t:"凌晨电台", a:"陈野", al:"午夜电台", d:247, vip:1},
+  {t:"折纸飞机", a:"Yuki 林柚", al:"童谣", d:176, vip:0},
+  {t:"萤火之森", a:"白鹿晴", al:"森", d:229, vip:0},
+  {t:"地铁站台", a:"江一舟", al:"通勤", d:214, vip:0},
+  {t:"半糖主义", a:"唐梨", al:"半糖", d:195, vip:0},
+  {t:"极光列车", a:"周屿", al:"北境", d:263, vip:1},
+  {t:"星期五的晚风", a:"Momo 陈默", al:"周五", d:187, vip:0},
+  {t:"白噪音", a:"简遇", al:"白噪音", d:258, vip:0},
+  {t:"柠檬气泡水", a:"Yuki 林柚", al:"夏日限定", d:179, vip:0},
+  {t:"偷星星的人", a:"陈野", al:"夜行者", d:226, vip:0},
+  {t:"环形山", a:"孟驰", al:"环形山", d:244, vip:1},
+  {t:"把夏天寄给你", a:"顾子宁", al:"寄给夏天", d:201, vip:0},
+  {t:"回声", a:"阿澈", al:"深蓝", d:236, vip:0},
+  {t:"无名小巷", a:"江一舟", al:"巷", d:219, vip:0},
+  {t:"银河漫游指南", a:"林晚晴", al:"漫游", d:272, vip:1},
+  {t:"晚安诗", a:"唐梨", al:"晚安诗", d:192, vip:0},
+];
+
+/* 封面色板 */
+const COVERS = [
+  ["#4fac8a","#2f6b52"],["#5b8def","#3557a8"],["#e97a9a","#b04a6e"],["#f2a35c","#c96f2e"],
+  ["#7c6fe0","#4b40a8"],["#43b0c9","#1f7a8f"],["#e0684f","#a63e2c"],["#67b26f","#3a7a42"],
+  ["#c9973f","#8a6423"],["#8e7cc3","#5e4b96"],["#d9607f","#96324f"],["#3fb8af","#1d6f69"]
+];
+
+/* 榜单结构 */
+const CHARTS = {
+  bq: {name:"飙升榜", grp:"推荐榜", time:"今日榜单 · 09:30 更新", desc:"统计近 24 小时播放量上升最快的歌曲。", n:25},
+  hot:{name:"热歌榜", grp:"推荐榜", time:"今日榜单 · 12:00 更新", desc:"综合播放量与收藏热度最高的歌曲。", n:22},
+  new:{name:"新歌榜", grp:"推荐榜", time:"今日榜单 · 10:00 更新", desc:"最近 7 天内发布的新歌，按热度排序。", n:16},
+  pop:{name:"流行指数榜", grp:"推荐榜", time:"今日榜单 · 09:00 更新", desc:"综合多平台热度指数生成的流行风向标。", n:16},
+  mv:{name:"MV 榜", grp:"推荐榜", time:"今日榜单 · 08:30 更新", desc:"近 24 小时 MV 播放热度最高的歌曲。", n:14},
+  cn:{name:"内地榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"内地地区播放热度最高的歌曲。", n:14},
+  hk:{name:"香港榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"香港地区播放热度最高的歌曲。", n:12},
+  tw:{name:"台湾榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"台湾地区播放热度最高的歌曲。", n:12},
+  us:{name:"欧美榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"欧美地区播放热度最高的歌曲。", n:12},
+  kr:{name:"韩国榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"韩国地区播放热度最高的歌曲。", n:12},
+  jp:{name:"日本榜", grp:"地区榜", time:"今日榜单 · 09:00 更新", desc:"日本地区播放热度最高的歌曲。", n:12},
+  rap:{name:"说唱榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"说唱类歌曲播放热度排行。", n:12},
+  edm:{name:"电音榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"电子音乐播放热度排行。", n:12},
+  game:{name:"游戏榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"游戏相关歌曲与主题曲排行。", n:12},
+  anim:{name:"动漫榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"动漫歌曲与主题曲排行。", n:12},
+  film:{name:"影视榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"影视原声歌曲排行。", n:12},
+  ktv:{name:"K歌榜", grp:"特色榜", time:"今日榜单 · 11:00 更新", desc:"K 歌点唱热度最高的歌曲。", n:12},
+  gus:{name:"美国榜", grp:"全球榜", time:"今日榜单 · 10:00 更新", desc:"美国地区播放热度排行。", n:12},
+  gkr:{name:"韩国全球榜", grp:"全球榜", time:"今日榜单 · 10:00 更新", desc:"韩国地区播放热度排行。", n:12},
+  guk:{name:"英国榜", grp:"全球榜", time:"今日榜单 · 10:00 更新", desc:"英国地区播放热度排行。", n:12},
+  gjp:{name:"日本全球榜", grp:"全球榜", time:"今日榜单 · 10:00 更新", desc:"日本地区播放热度排行。", n:12},
+};
+
+/* 榜单歌曲生成（确定性） */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function buildChart(id){
+  const info = CHARTS[id];
+  const rnd = mulberry32(id.split('').reduce((s,c)=>s+c.charCodeAt(0),0));
+  const idx = [...Array(CAT.length).keys()];
+  for(let i=idx.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
+  const songs = idx.slice(0, info.n).map((ci,pos)=>{
+    let tr;
+    if(id==='bq'){ tr = pos<3?{k:'up',n:20-pos*4+Math.floor(rnd()*5)} : rnd()<.18?{k:'new'} : rnd()<.6?{k:'up',n:Math.ceil(rnd()*15)} : rnd()<.5?{k:'down',n:Math.ceil(rnd()*6)} : null }
+    else if(id==='new'){ tr = rnd()<.8?{k:'new'} : {k:'up',n:Math.ceil(rnd()*9)} }
+    else { const p=rnd(); tr = p<.12?{k:'new'} : p<.5?{k:'up',n:Math.ceil(rnd()*9)} : p<.68?{k:'down',n:Math.ceil(rnd()*5)} : null }
+    return {id:id+':'+pos, ci, ...CAT[ci], pos, tr};
+  });
+  return {info, songs};
+}
+/* 预生成 */
+const listData = {};
+for(const id in CHARTS){ listData[id] = buildChart(id); }
+const LIST_ORDER = Object.keys(CHARTS); // 用于首屏后其他榜单
+
+/* ================= 状态 ================= */
+const S = {
+  current: 'bq',
+  expanded: {推荐榜:true, 地区榜:false, 特色榜:false, 全球榜:false},
+  queue: [],       // 歌曲对象数组
+  qi: 0,           // 当前下标
+  playing: false,
+  active: false,   // 用户是否已主动开始播放（否则仅展示榜首默认曲）
+  fullListOf: null,// 播放全部对应的榜单 id
+  hover:false,      // 鼠标是否位于底部唤起热区
+  pinned:false,    // 是否订住播放栏（订住后移出也不收起）
+  batch: false,
+  sel: new Set(),
+  loaded: 20,
+  fav: new Set(),  // 键 id:cid? 用 `${ci}`? 用对象引用不稳定 → 用 `${ci}:${i}` 即每个榜单内歌曲，但收藏应跨榜单按歌曲本身。用 ci 唯一标识歌曲
+  favCache: new Set(), // 存 ci
+  playlists: [
+    {name:"我喜欢的音乐", cnt:0, builtin:true},
+    {name:"通勤路上", cnt:0},
+    {name:"周末发呆", cnt:0},
+  ],
+  cur: 0, dur:0,
+  vol: 0.8,
+  page: 1,
+};
+const favOf = song => S.favCache.has(song.ci);
+
+/* ================= DOM 引用 ================= */
+const $ = s => document.querySelector(s);
+const songListEl = $('#songList');
+const skelWrap = $('#skelWrap');
+
+/* ================= 工具 ================= */
+function fmt(s){ s=Math.max(0,Math.round(s)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function coverUrl(ci){ return 'https://picsum.photos/seed/qqcover' + ci + '/104/104'; }
+function coverStyle(ci){ const c = COVERS[ci % COVERS.length]; return `background:linear-gradient(135deg,${c[0]},${c[1]})`; }
+function trendHtml(tr){
+  if(!tr) return '<span class="trend"></span>';
+  if(tr.k==='new') return '<span class="trend new">新</span>';
+  if(tr.k==='up') return `<span class="trend up">↑${tr.n}</span>`;
+  return `<span class="trend down">↓${tr.n}</span>`;
+}
+function songRow(song, rank, batchMode){
+  const playing = S.active && S.queue[S.qi]===song;
+  const li = document.createElement('div');
+  li.className='song-row'+(playing?' playing':'');
+  li.dataset.key=song.id;
+  li.innerHTML = `
+    <div class="rank-cell">
+      ${batchMode?`<span class="check-cell"><span class="cb"></span></span>`:''}
+      ${rank<=3 ? `<img class="rank-badge" src="素材参考/${rank}.png" alt="${rank}">` : `<span class="rank-num">${rank}</span>`}
+      <span class="play-hint"><svg class="icon" style="width:22px;height:22px"><use href="#i-play"/></svg></span>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
+    <div class="trend-cell">${trendHtml(song.tr)}</div>
+    <div class="cover" style="${coverStyle(song.ci)}"><span class="ring"></span><img src="${coverUrl(song.ci)}" alt="" loading="lazy" onerror="this.remove()"><span class="cnote">♪</span></div>
+    <div class="song-main">
+      <div>
+        <div class="song-tt">
+          <span class="song-name">${esc(song.t)}</span>
+          ${song.vip?'<span class="tags"><span class="tag vip">VIP</span></span>':''}
+        </div>
+        <div class="song-sub">${esc(song.al)}</div>
+      </div>
+    </div>
+    <div class="artist-cell">${esc(song.a)}</div>
+    <div class="dur">${fmt(song.d)}</div>
+    <div class="row-ops">
+      ${favOf(song)?`<button class="op-btn liked" data-op="fav" data-tip="取消收藏" aria-label="取消收藏"><svg class="icon icon-sm" style="color:var(--heart)"><use href="#i-heart-fill"/></svg></button>`:`<button class="op-btn" data-op="fav" data-tip="收藏" aria-label="收藏"><svg class="icon icon-sm"><use href="#i-heart"/></svg></button>`}
+      <button class="op-btn" data-op="add" data-tip="添加到歌单" aria-label="加入歌单"><svg class="icon icon-sm"><use href="#i-plus"/></svg></button>
+      <button class="op-btn" data-op="menu" data-tip="更多" aria-label="更多"><svg class="icon icon-sm"><use href="#i-more"/></svg></button>
+    </div>
+    <div class="row-menu" data-key="${song.id}">
+      <button data-m="play"><svg class="icon icon-sm"><use href="#i-play"/></svg>播放</button>
+      <button data-m="fav">${favOf(song)?'<svg class="icon icon-sm"><use href="#i-heart-fill"/></svg>取消收藏':'<svg class="icon icon-sm"><use href="#i-heart"/></svg>收藏'}</button>
+      <button data-m="add"><svg class="icon icon-sm"><use href="#i-plus"/></svg>加入歌单</button>
+      <button data-m="download"><svg class="icon icon-sm"><use href="#i-up"/></svg>下载</button>
+      <button data-m="share"><svg class="icon icon-sm"><use href="#i-heart"/></svg>分享</button>
+    </div>
+  `;
+  return li;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ================= 骨架屏 ================= */
+function showSkeleton(rows){
+  skelWrap.innerHTML = Array.from({length:rows}).map(()=>`
+    <div class="skel-row"><span class="sk rk"></span><span class="sk tr"></span><span class="sk cv"></span>
+    <div><div class="sk sg"></div><div class="sk ar" style="width:40%"></div></div><span class="sk du"></span><span></span></div>`).join('');
+}
+function hideSkeleton(){ skelWrap.innerHTML=''; }
+
+/* ================= Toast ================= */
+function toast(msg){
+  const box = $('#toasts');
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  box.appendChild(el);
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),350); }, 1800);
+}
+
+/* ================= 榜单导航 ================= */
+function renderRail(){
+  const groups = ['推荐榜','地区榜','特色榜','全球榜'];
+  const el = $('#railGroups'); el.innerHTML='';
+  const q = $('#railQuery').value.trim().toLowerCase();
+  const searching = !!q;
+  groups.forEach(g=>{
+    const items = Object.keys(CHARTS).filter(id=>CHARTS[id].grp===g && CHARTS[id].name.toLowerCase().includes(q));
+    if(searching && items.length===0) return;   // 搜索时无匹配则整组隐藏
+    const open = searching ? true : !!S.expanded[g];
+    const group = document.createElement('div');
+    group.className = 'group' + (open?'':' collapsed');
+    const head = document.createElement('button');
+    head.className='group-head';
+    head.setAttribute('aria-expanded', String(open));
+    head.innerHTML = `<span>${esc(g)}</span><svg class="icon icon-sm chev" aria-hidden="true"><use href="#i-chev"/></svg>`;
+    head.addEventListener('click', ()=>{
+      if(searching){
+        S.expanded[g] = !S.expanded[g];
+        renderRail(); // 搜索状态下仍保持展开展示，但状态被记录
+        return;
+      }
+      S.expanded[g]=!S.expanded[g];
+      renderRail();
+    });
+    const wrap = document.createElement('div');
+    wrap.className='group-items';
+    items.forEach(id=>{
+      const b = document.createElement('button');
+      b.className='list-link'+(S.current===id?' active':'');
+      b.dataset.id=id;
+      b.innerHTML = `<span class="dot"></span>${esc(CHARTS[id].name)}<span class="cnt">${CHARTS[id].n}</span>`;
+      b.addEventListener('click', ()=>selectChart(id));
+      wrap.appendChild(b);
+    });
+    group.appendChild(head);
+    group.appendChild(wrap);
+    el.appendChild(group);
+  });
+}
+
+/* ================= 主内容渲染 ================= */
+function setDefaultTrack(id){
+  const songs = listData[id].songs;
+  if(songs.length){
+    S.queue = [songs[0]];
+    S.qi = 0;
+    S.cur = 0;
+    S.playing = false;
+    S.fullListOf = null;
+  } else {
+    S.queue = []; S.qi = 0; S.cur = 0; S.playing = false; S.fullListOf = null;
+  }
+  S.active = false;      // 仅展示榜首默认曲，未进入“播放中”
+  updatePlayer();
+}
+
+function selectChart(id, opts={}){
+  S.current = id;
+  S.loaded = 20;
+  S.batch=false; S.sel.clear();
+  $('#batchBar').classList.remove('show');
+  document.getElementById('main').classList.remove('batch-on');
+  $('#playAllBtn').classList.remove('is-playing');
+  renderRail();
+  $('#chartName').textContent = CHARTS[id].name;
+  $('#chartTime').textContent = CHARTS[id].time;
+  $('#ruleName').textContent = CHARTS[id].name + ' · 更新规则';
+  $('#ruleDesc').textContent = CHARTS[id].desc;
+  if(!S.active) setDefaultTrack(id);   // 未开始播放时，播放栏默认展示新榜单第 1 名
+  syncPlayAll();
+  loadChart(id);
+  document.getElementById('main').scrollIntoView({behavior:opts.smooth?'smooth':'auto', block:'start'});
+}
+
+function loadChart(id, fromMore){
+  songListEl.innerHTML='';
+  $('#emptyState').classList.remove('show');
+  const data = listData[id];
+  // 模拟首屏 Loading
+  if(!fromMore){ showSkeleton(Math.min(data.songs.length, 20)); }
+  setTimeout(()=>{
+    hideSkeleton();
+    renderSongs(data.songs, id);
+    syncRows();
+  }, fromMore?300:650);
+}
+
+function renderSongs(songs, id){
+  const total = songs.length;
+  const toShow = S.batch ? total : Math.min(total, S.loaded);
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<toShow;i++){ frag.appendChild(songRow(songs[i], i+1, S.batch)); }
+  songListEl.innerHTML='';
+  songListEl.appendChild(frag);
+  const lm = $('#loadMoreBtn');
+  if(!S.batch && S.loaded < total){
+    lm.style.display='';
+    lm.textContent = `加载更多（已显示 ${S.loaded}/${total}）`;
+    lm.disabled = false;
+    lm.style.color = '';
+  } else {
+    lm.style.display='none';
+  }
+  if(total===0){ $('#emptyState').classList.add('show'); lm.style.display='none'; }
+}
+
+/* ================= 播放器状态 ================= */
+function syncPlayAll(){
+  const data = listData[S.current];
+  const isFull = S.fullListOf===S.current && S.queue.length>=data.songs.length;
+  const btn = $('#playAllBtn');
+  if(isFull && S.playing){ btn.classList.add('is-playing'); $('#playAllLabel').textContent='暂停全部'; $('#playAllBtn .icon').innerHTML='<use href="#i-pause"/>'; }
+  else if(isFull && !S.playing){ btn.classList.remove('is-playing'); $('#playAllLabel').textContent='播放全部'; $('#playAllBtn .icon').innerHTML='<use href="#i-play"/>'; }
+  else { btn.classList.remove('is-playing'); $('#playAllLabel').textContent='播放全部'; $('#playAllBtn .icon').innerHTML='<use href="#i-play"/>'; }
+}
+function syncRows(){
+  const current = S.queue[S.qi];
+  songListEl.querySelectorAll('.song-row').forEach(row=>{
+    const key = row.dataset.key;
+    const isCur = S.active && current && key===current.id;
+    const isPlaying = isCur && S.playing;
+    row.classList.toggle('playing', isCur);
+    const hintUse = row.querySelector('.play-hint use');
+    if(hintUse) hintUse.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
+    if(S.batch){
+      const cb = row.querySelector('.cb');
+      cb.classList.toggle('on', S.sel.has(key));
+    }
+  });
+  $('#selCount').textContent = S.sel.size;
+}
+/* ===== 底部播放栏显隐逻辑（网易云式滑出）===== */
+const PLAYER_H = 84;
+function applyVis(){
+  const has = S.queue.length>0;
+  const v = S.pinned || S.hover;             // 订住时常驻，否则悬停即现、移出即收
+  const p = $('#player');
+  p.classList.toggle('show', v);
+  p.classList.toggle('empty', !has);
+  document.body.classList.toggle('pad-player', v && has);
+}
+window.addEventListener('mousemove', e=>{
+  S.hover = e.clientY >= window.innerHeight - (PLAYER_H + 12);
+  applyVis();
+},{passive:true});
+document.addEventListener('mouseleave', ()=>{ S.hover=false; applyVis(); });
+
+function updatePlayer(){
+  const song = S.queue[S.qi];
+  if(!song){
+    $('#pCover').style.background = '#eef0f2';
+    $('#pCover').innerHTML = '<span class="cnote">♪</span>';
+    $('#pName').textContent = '--';
+    $('#pArtist').textContent = '--';
+    $('#pCur').textContent = '00:00';
+    $('#pDur').textContent = '00:00';
+    $('#pBarFill').style.width = '0%';
+    $('#pToggle .icon').innerHTML = '<use href="#i-play"/>';
+    $('#pToggle').setAttribute('data-tip','播放 / 暂停');
+    syncRows();
+    applyVis();
+    return;
+  }
+  $('#pCover').style.cssText = coverStyle(song.ci);
+  $('#pCover').innerHTML = '<img alt="" onerror="this.remove()" src="' + coverUrl(song.ci) + '"><span class="cnote">♪</span>';
+  $('#pName').textContent = song.t;
+  $('#pArtist').textContent = song.a;
+  $('#pToggle .icon').innerHTML = S.playing?'<use href="#i-pause"/>':'<use href="#i-play"/>';
+  const fav = favOf(song);
+  $('#pFav').classList.toggle('liked', fav);
+  $('#pFavIco').innerHTML = fav?'<use href="#i-heart-fill"/>':'<use href="#i-heart"/>';
+  $('#pFav').setAttribute('data-tip', fav?'取消收藏':'收藏');
+  if(S.fullListOf===S.current && S.queue.length>=listData[S.current].songs.length) syncPlayAll();
+  else $('#playAllBtn').classList.remove('is-playing'), $('#playAllLabel').textContent='播放全部', $('#playAllBtn .icon').innerHTML='<use href="#i-play"/>';
+  syncRows();
+  applyVis();
+}
+function tick(){
+  if(!S.playing) return;
+  S.cur += .25;
+  const song = S.queue[S.qi];
+  if(S.cur >= song.d){ next(true); return; }
+  paintProgress();
+}
+function paintProgress(){
+  const song = S.queue[S.qi]; if(!song) return;
+  const p = Math.min(100, S.cur/song.d*100);
+  $('#pBarFill').style.width = p+'%';
+  $('#pBar').setAttribute('aria-valuenow', Math.round(p));
+  $('#pCur').textContent = fmt(S.cur);
+  $('#pDur').textContent = fmt(song.d);
+}
+let timer = null;
+function playFrom(listId, idx, mode){
+  const songs = mode==='all' ? listData[listId].songs : listData[listId].songs;
+  const start = mode==='all' ? 0 : idx;
+  S.queue = songs.slice();
+  S.qi = Math.min(start, songs.length-1);
+  S.cur = 0;
+  S.fullListOf = mode==='all' ? listId : null;
+  S.playing = true;
+  S.active = true;
+  clearInterval(timer); timer = setInterval(tick, 250);
+  updatePlayer();
+  paintProgress();
+}
+function togglePlay(){
+  if(!S.queue.length){ return; }
+  if(S.playing){ S.playing=false; clearInterval(timer); }
+  else { S.active=true; S.playing=true; timer=setInterval(tick,250); if(S.cur>=S.queue[S.qi].d) S.cur=0; }
+  updatePlayer();
+}
+function step(dir){
+  if(!S.queue.length) return;
+  S.active = true;
+  S.qi = (S.qi + dir + S.queue.length) % S.queue.length;
+  S.cur = 0; if(!S.playing){ S.playing=true; timer=setInterval(tick,250); }
+  updatePlayer(); paintProgress();
+  toast((dir>0?'正在播放：':'上一首：') + S.queue[S.qi].t);
+}
+
+/* ================= 批量操作 ================= */
+function setBatch(on){
+  S.batch = on;
+  const main = document.getElementById('main');
+  main.classList.toggle('batch-on', on);
+  $('#batchBar').classList.toggle('show', on);
+  if(on) S.sel.clear();
+  else S.sel.clear();
+  renderSongs(listData[S.current].songs, S.current);
+  syncRows();
+  $('#selCount').textContent='0';
+}
+
+/* ================= 歌单 ================= */
+let pendingSongs = []; // 待添加歌曲 {song, isAll}
+function openPlaylist(songs){
+  pendingSongs = songs;
+  renderPlaylists();
+  $('#plOverlay').classList.add('open');
+  $('#plNewName').value='';
+}
+function renderPlaylists(){
+  const box = $('#plList'); box.innerHTML='';
+  S.playlists.forEach((pl,i)=>{
+    const item = document.createElement('div');
+    item.className='pl-item';
+    item.innerHTML = `<span class="pl-icon"><img src="https://picsum.photos/seed/pl${i}/64/64" alt="" onerror="this.remove()"></span>
+      <span class="pl-name">${esc(pl.name)}</span><span class="pl-cnt">${pl.cnt} 首</span>`;
+    item.addEventListener('click', ()=>{
+      box.querySelectorAll('.pl-item').forEach(x=>x.classList.remove('sel'));
+      item.classList.add('sel');
+      pendingSongs.target=i;
+    });
+    box.appendChild(item);
+  });
+}
+function commitAdd(){
+  if(pendingSongs.target==null){ toast('请选择一个歌单'); return; }
+  const pl = S.playlists[pendingSongs.target];
+  pl.cnt += pendingSongs.songs.length;
+  pendingSongs.songs.forEach(s=>s.added || (s.added=pl.name));
+  closeOverlay('plOverlay');
+  toast(`已添加 ${pendingSongs.songs.length} 首到《${pl.name}》`);
+  pendingSongs=[];
+}
+
+/* ================= 弹窗控制 ================= */
+function closeOverlay(id){ $('#'+id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+document.querySelectorAll('[data-close]').forEach(b=>{
+  b.addEventListener('click', ()=> b.closest('.overlay').classList.remove('open'));
+});
+
+/* ================= 事件绑定 ================= */
+$('#railQuery').addEventListener('input', renderRail);
+
+$('#playAllBtn').addEventListener('click', ()=>{
+  const data = listData[S.current];
+  if(!data.songs.length){ toast('该榜单暂无歌曲'); return; }
+  const isFullPlaying = S.fullListOf===S.current && S.queue.length>=data.songs.length && S.playing;
+  const isFullPaused = S.fullListOf===S.current && S.queue.length>=data.songs.length && !S.playing && S.queue.length>0;
+  if(isFullPlaying){ togglePlay(); return; }      // 正在播 → 暂停
+  if(isFullPaused && S.queue[S.qi]){ S.active=true; S.playing=true; timer=setInterval(tick,250); updatePlayer(); return; } // 暂停 → 继续
+  playFrom(S.current, 0, 'all');                  // 从第 1 首整榜连播
+  if(S.batch) setBatch(false);
+  toast(`开始播放《${CHARTS[S.current].name}》全部歌曲`);
+});
+
+$('#moreBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  const m=$('#moreMenu'); m.classList.toggle('open');
+  $('#moreBtn').setAttribute('aria-expanded', m.classList.contains('open'));
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#moreMenu') && !e.target.closest('#moreBtn')) $('#moreMenu').classList.remove('open');
+  if(!e.target.closest('.row-menu') && !e.target.closest('[data-op="menu"]')) document.querySelectorAll('.row-menu.open').forEach(x=>x.classList.remove('open'));
+});
+$('#moreMenu').addEventListener('click', e=>{
+  const act = e.target.closest('button')?.dataset.act; if(!act) return;
+  $('#moreMenu').classList.remove('open');
+  if(act==='batch'){ setBatch(true); toast('已进入批量选择模式'); }
+  else if(act==='download') toast('模拟：批量下载已发起');
+  else if(act==='share') toast('链接已复制，快去分享吧');
+});
+
+/* 行级事件委托 */
+songListEl.addEventListener('click', e=>{
+  const opBtn = e.target.closest('[data-op]');
+  const row = e.target.closest('.song-row'); if(!row) return;
+  const key = row.dataset.key;
+  const song = listData[S.current].songs.find(s=>s.id===key);
+  const idx = listData[S.current].songs.indexOf(song);
+  const closeMenus = ()=>{ document.querySelectorAll('.row-menu.open').forEach(x=>x.classList.remove('open')); };
+  if(opBtn){
+    const op = opBtn.dataset.op;
+    if(op==='fav'){
+      if(favOf(song)){ S.favCache.delete(song.ci); opBtn.classList.remove('liked'); opBtn.setAttribute('aria-label','收藏'); opBtn.setAttribute('data-tip','收藏'); opBtn.innerHTML='<svg class="icon icon-sm"><use href="#i-heart"/></svg>'; toast('已取消收藏'); }
+      else { S.favCache.add(song.ci); opBtn.classList.add('liked'); opBtn.setAttribute('aria-label','取消收藏'); opBtn.setAttribute('data-tip','取消收藏'); opBtn.innerHTML='<svg class="icon icon-sm" style="color:var(--heart)"><use href="#i-heart-fill"/></svg>'; toast('已收藏 ♥'); }
+      if(S.queue[S.qi]===song) updatePlayer();
+      return;
+    }
+    if(op==='add'){ openPlaylist([song]); return; }
+    if(op==='menu'){ closeMenus(); const m=row.querySelector('.row-menu'); m.classList.toggle('open'); return; }
+    return;
+  }
+  const cb = e.target.closest('.cb');
+  if(S.batch){
+    if(cb){
+      S.sel.has(key)?S.sel.delete(key):S.sel.add(key);
+      row.querySelector('.cb').classList.toggle('on', S.sel.has(key));
+      $('#selCount').textContent = S.sel.size;
+    } else {
+      // 点击非勾选处也当作选中
+      if(!S.sel.has(key)){ S.sel.add(key); row.querySelector('.cb')?.classList.add('on'); $('#selCount').textContent=S.sel.size; }
+    }
+    return;
+  }
+  // 行内菜单按钮
+  const mi = e.target.closest('[data-m]');
+  if(mi){
+    const act = mi.dataset.m; closeMenus();
+    if(act==='play'){ playFrom(S.current, idx, 'one'); }
+    else if(act==='fav'){
+      if(favOf(song)){ S.favCache.delete(song.ci); toast('已取消收藏'); } else { S.favCache.add(song.ci); toast('已收藏 ♥'); }
+      renderSongs(listData[S.current].songs, S.current); syncRows(); if(S.queue[S.qi]===song) updatePlayer();
+    }
+    else if(act==='add') openPlaylist([song]);
+    else if(act==='download') toast('已开始下载');
+    else if(act==='share') toast('已生成分享链接');
+    return;
+  }
+  // 默认：点击行播放
+  if(S.queue[S.qi]===song && S.playing){ togglePlay(); }
+  else if(S.queue[S.qi]===song && !S.playing){ togglePlay(); }
+  else { playFrom(S.current, idx, 'one'); }
+});
+
+$('#addAllBtn').addEventListener('click', ()=> openPlaylist(listData[S.current].songs.slice()));
+
+/* 播放器控制 */
+$('#pToggle').addEventListener('click', togglePlay);
+$('#pPrev').addEventListener('click', ()=> step(-1));
+$('#pNext').addEventListener('click', ()=> step(1));
+$('#pFav').addEventListener('click', ()=>{
+  const song=S.queue[S.qi]; if(!song) return;
+  if(favOf(song)){ S.favCache.delete(song.ci); toast('已取消收藏'); } else { S.favCache.add(song.ci); toast('已收藏 ♥'); }
+  updatePlayer(); renderSongs(listData[S.current].songs, S.current); syncRows();
+});
+$('#pAdd').addEventListener('click', ()=>{ if(S.queue[S.qi]) openPlaylist([S.queue[S.qi]]); });
+$('#pStop').addEventListener('click', ()=>{
+  S.pinned = !S.pinned;
+  $('#pStop').classList.toggle('pinned', S.pinned);
+  toast(S.pinned ? '已订住播放栏，移出不再收起' : '已取消订住，移出将收起');
+  applyVis();
+});
+$('#pBar').addEventListener('click', e=>{
+  if(!S.queue.length) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+  S.cur = p * S.queue[S.qi].d;
+  paintProgress();
+});
+$('#pBar').addEventListener('keydown', e=>{
+  if(!S.queue.length || (e.key!=='ArrowLeft' && e.key!=='ArrowRight')) return;
+  e.preventDefault(); S.cur = Math.max(0, Math.min(S.queue[S.qi].d, S.cur + (e.key==='ArrowRight'?5:-5))); paintProgress();
+});
+$('#volBar').addEventListener('click', e=>{
+  const rect = e.currentTarget.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
+  S.vol=p; $('#volFill').style.width=(p*100)+'%';
+});
+
+/* 批量栏 */
+$('#batchCancel').addEventListener('click', ()=>setBatch(false));
+$('#batchPlay').addEventListener('click', ()=>{
+  const ids=[...S.sel]; if(!ids.length){ toast('请先选择歌曲'); return; }
+  const all = listData[S.current].songs;
+  const chosen = all.filter(s=>S.sel.has(s.id));
+  S.queue = chosen.slice(); S.qi=0; S.cur=0; S.fullListOf=null; S.active=true; S.playing=true;
+  clearInterval(timer); timer=setInterval(tick,250);
+  setBatch(false); updatePlayer(); paintProgress();
+  toast(`开始播放已选的 ${chosen.length} 首`);
+});
+$('#batchAdd').addEventListener('click', ()=>{
+  const ids=[...S.sel]; if(!ids.length){ toast('请先选择歌曲'); return; }
+  const chosen = listData[S.current].songs.filter(s=>S.sel.has(s.id));
+  setBatch(false);
+  openPlaylist(chosen);
+});
+
+/* 加载更多 */
+$('#loadMoreBtn').addEventListener('click', ()=>{
+  const total = listData[S.current].songs.length;
+  const addN = Math.min(10, total - S.loaded);
+  showSkeleton(addN);
+  setTimeout(()=>{
+    S.loaded = Math.min(total, S.loaded + addN);
+    hideSkeleton();
+    renderSongs(listData[S.current].songs, S.current);
+    syncRows();
+  }, 400);
+});
+
+/* 歌单弹窗 */
+$('#plNewBtn').addEventListener('click', ()=>{
+  const name = $('#plNewName').value.trim(); if(!name){ toast('请输入歌单名称'); return; }
+  if(S.playlists.some(p=>p.name===name)){ toast('已存在同名歌单'); return; }
+  S.playlists.push({name, cnt:0});
+  toast(`已创建《${name}》`);
+  renderPlaylists();
+});
+$('#plNewName').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#plNewBtn').click(); });
+$('#plConfirm').addEventListener('click', commitAdd);
+$('#ruleBtn').addEventListener('click', ()=> $('#ruleOverlay').classList.add('open'));
+
+/* 空状态重新加载 */
+$('#emptyReload').addEventListener('click', ()=> loadChart(S.current, true));
+
+/* 回顶部 */
+const toTopBtn = $('#toTopBtn');
+window.addEventListener('scroll', ()=>{
+  const show = window.scrollY > 300;
+  toTopBtn.classList.toggle('top-visible', show);
+}, {passive:true});
+toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+
+/* ================= 评论区 ================= */
+$('#cText').addEventListener('input', ()=>{
+  $('#cSubmit').disabled = $('#cText').value.trim() === '';
+});
+$('#cSubmit').addEventListener('click', ()=>{
+  const t = $('#cText').value.trim();
+  if(!t){ toast('请输入评论内容'); return; }
+  const item = document.createElement('div');
+  item.className = 'c-item';
+  item.innerHTML = '<div class="c-avatar"><img src="https://picsum.photos/id/1036/80/80" alt="" onerror="this.remove()">我</div><div class="c-main"><div class="c-top"><span class="c-user">我</span><span class="c-time">刚刚</span></div><div class="c-text">' + esc(t) + '</div><div class="c-actions"><button class="c-like">♥ 0</button><button class="c-reply">回复</button></div></div>';
+  $('#cList').prepend(item);
+  $('#cText').value = '';
+  $('#cSubmit').disabled = true;
+  toast('评论已发布');
+});
+const NEW_COMMENTS = [
+  {user:'旋律捕手', time:'刚刚', text:'刚刷到，第一名的《0.5x》真的绝了，单曲循环中', like:'128'},
+  {user:'夜半听风', time:'3分钟前', text:'这期飙升榜质量太高，果断收藏', like:'86'},
+  {user:'白昼梦游', time:'8分钟前', text:'从歌单一路听下来，根本停不下来', like:'54'},
+];
+document.querySelectorAll('.c-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.c-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const isHot = tab.textContent.trim() === '精彩评论';
+    document.querySelectorAll('.c-item.is-new').forEach(n=>n.remove());
+    if(!isHot){
+      NEW_COMMENTS.forEach(c=>{
+        const item = document.createElement('div');
+        item.className = 'c-item is-new';
+        item.innerHTML = '<div class="c-avatar"><img src="https://picsum.photos/id/1036/80/80" alt="" onerror="this.remove()">' + c.user[0] + '</div><div class="c-main"><div class="c-top"><span class="c-user">' + c.user + '</span><span class="c-time">' + c.time + '</span></div><div class="c-text">' + c.text + '</div><div class="c-actions"><button class="c-like">♥ ' + c.like + '</button><button class="c-reply">回复</button></div></div>';
+        $('#cList').prepend(item);
+      });
+      toast('已切换到最新评论');
+    } else {
+      toast('已切换到精彩评论');
+    }
+  });
+});
+$('#cPagination').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.page-btn');
+  if(!btn || btn.classList.contains('disabled')) return;
+  const txt = btn.textContent;
+  if(txt === '上一页'){ toast('已是第一页'); return; }
+  if(txt === '下一页'){ toast('已切换到下一页（模拟）'); return; }
+  document.querySelectorAll('#cPagination .page-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+});
+$('#cList').addEventListener('click', (e)=>{
+  const like = e.target.closest('.c-like');
+  if(like){
+    const on = like.classList.toggle('liked');
+    toast(on ? '已点赞' : '已取消点赞');
+    return;
+  }
+  const reply = e.target.closest('.c-reply');
+  if(reply){
+    const user = reply.closest('.c-item').querySelector('.c-user').textContent.trim();
+    toast('回复 @' + user + '（功能即将上线）');
+    $('#cText').focus();
+  }
+});
+
+/* ================= 初始化 ================= */
+renderRail();
+selectChart('bq');
+applyVis();
+</script>
+
+
+</body></html>
