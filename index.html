@@ -72,13 +72,13 @@ a{text-decoration:none;color:inherit}
   /* ---------- 顶部导航（深色第一行 / 品牌绿第二行） ---------- */
   .topbar{position:sticky;top:0;z-index:50;height:var(--top-h);background:#0B1320}
   .trow{width:100%;background:#0B1320}
-  .trow1{height:70px;display:flex;align-items:center}
-  .trow1-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:38px;width:100%}
-  .trow2{height:48px;display:flex;align-items:center;background:#2CC285}
-  .trow2-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:4px;width:100%}
+  .trow1{height:70px;max-height:70px;overflow:hidden;display:flex;align-items:center}
+  .trow1-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:38px;width:100%;max-height:70px;overflow:hidden}
+  .trow2{height:48px;max-height:48px;overflow:hidden;display:flex;align-items:center;background:#2CC285}
+  .trow2-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:4px;width:100%;max-height:48px;overflow:hidden}
   .logo{flex:none;line-height:0;display:flex;align-items:center;gap:8px}
   .logo-text{font-size:22px;font-weight:700;color:#fff;line-height:1}
-  .logo img{display:block;height:30px;width:auto}
+  .logo img{display:block;height:30px!important;max-height:30px;width:auto}
   .logo:hover{opacity:.9}
   .tnav{display:flex;align-items:center;gap:6px}
   .tlink{display:block;height:70px;line-height:70px;padding:0 13px;font-size:15px;color:rgba(255,255,255,.78);text-decoration:none;white-space:nowrap;transition:color .12s}
@@ -1764,7 +1764,6 @@ function selectChart(id, opts={}){
   if(!S.active) setDefaultTrack(id);   // 未开始播放时，播放栏默认展示新榜单第 1 名
   syncPlayAll();
   loadChart(id);
-  document.getElementById('main').scrollIntoView({behavior:opts.smooth?'smooth':'auto', block:'start'});
 }
 
 function loadChart(id, fromMore){
